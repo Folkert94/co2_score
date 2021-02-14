@@ -92,6 +92,16 @@ def calculate():
 
     return result
 
+@app.route('/deleteall')
+def deleteall():
+    groceries = Grocery.query.all()
+
+    for grocery in groceries:
+        db.session.delete(grocery)
+        db.session.commit()
+
+    return redirect("/")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

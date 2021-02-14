@@ -24,14 +24,15 @@
       <tr>
         <td>{{ grocery.name }}</td>
         <td>{{ grocery.quantity }}</td>
-        <td class="text-right"><a class="btn btn-warning" href="/update/{{ grocery.id }}" role="button">Aanpassen</a></td>
+        <td class="text-right"><a class="btn btn-warning btn-sm" href="/update/{{ grocery.id }}" role="button">Aanpassen</a></td>
         <td class="text-right"><a class="btn btn-danger btn-sm" href="/delete/{{ grocery.id }}" role="button">Verwijderen</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-  <a class="btn btn-success" onclick="CalculateCo2();" role="button">Berekenen</a>
-  <script type="text/javascript" src="../static/js/calculate.js"></script>
+  <a class="btn btn-danger btn-sm" href="/deleteall" role="button">Alles Verwijderen</a>
+  <a class="btn btn-success btn-sm" onclick="CalculateCo2();" role="button">Berekenen</a>
+  <script type="text/javascript" src="../static/js/crud_functions.js"></script>
   <br><br>
   <p id="co2-score"></p>
   {% endif %}
