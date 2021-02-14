@@ -33,8 +33,8 @@ def index():
         quantity = request.form['quantity']
         new_stuff = Grocery(name=name, quantity=quantity)
 
-        if name not in co2_dict:
-            return "Ingredient hebben we niet"
+        if name.lower() not in co2_dict:
+            return "Dit ingredient zit niet in het recept"
 
         try:
             db.session.add(new_stuff)
