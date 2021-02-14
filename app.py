@@ -8,6 +8,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+co2_dict = {}
+with open('data/co2_scores.csv') as csv_file:
+    data = csv.reader(csv_file, delimiter=',')
+    for row in data:
+        co2_dict[row[0]] = float(row[1])
+
 
 class Grocery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,6 +32,9 @@ def index():
         name = request.form['name']
         quantity = request.form['quantity']
         new_stuff = Grocery(name=name, quantity=quantity)
+
+        if name not in co2_dict:
+            return "Ingredient hebben we niet"
 
         try:
             db.session.add(new_stuff)
@@ -72,12 +81,6 @@ def update(id):
 @app.route('/calculate', methods=['GET'])
 def calculate():
     groceries = Grocery.query.all()
-
-    co2_dict = {}
-    with open('data/co2_scores.csv') as csv_file:
-        data = csv.reader(csv_file, delimiter=',')
-        for row in data:
-            co2_dict[row[0]] = float(row[1])
 
     co2_score = 0.0
     success = True

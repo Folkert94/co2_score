@@ -3,7 +3,9 @@
 {% block content %}
 <div class="container">
   <h1 class="my-4">KANKER WOKE KOKEN</h1>
-
+  {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
   {% include 'snippets/form.html' %}
 
   <br>
@@ -30,8 +32,14 @@
       {% endfor %}
     </tbody>
   </table>
-  <a class="btn btn-danger btn-sm" href="/deleteall" role="button">Alles Verwijderen</a>
-  <a class="btn btn-success btn-sm" onclick="CalculateCo2();" role="button">Berekenen</a>
+  <div class "buttons">
+    <div style='float: left;'>
+      <a class="btn btn-success btn-sm" onclick="CalculateCo2();" role="button">Berekenen</a>
+    </div>
+    <div style='float: right;'>
+      <a class="btn btn-danger btn-sm" href="/deleteall" role="button">Alles Verwijderen</a>
+    </div>
+  </div>
   <script type="text/javascript" src="../static/js/crud_functions.js"></script>
   <br><br>
   <p id="co2-score"></p>
