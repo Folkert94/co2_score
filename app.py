@@ -12,7 +12,7 @@ co2_dict = {}
 with open('data/co2_scores_nl.csv') as csv_file:
     data = csv.reader(csv_file, delimiter=',')
     for row in data:
-        co2_dict[row[0]] = float(row[1])
+        co2_dict[row[0].lower()] = float(row[1])
 
 
 class Grocery(db.Model):
