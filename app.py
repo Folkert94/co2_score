@@ -9,7 +9,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 
 co2_dict = {}
-with open('data/co2_scores.csv') as csv_file:
+with open('data/co2_scores_nl.csv') as csv_file:
     data = csv.reader(csv_file, delimiter=',')
     for row in data:
         co2_dict[row[0]] = float(row[1])
