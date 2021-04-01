@@ -1,48 +1,922 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-  <h1 class="my-4">SUPER WOKE KOKEN</h1>
-  {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-  {% include 'snippets/form.html' %}
 
-  <br>
-  {% if groceries|length < 1 %}
-  <p>Er is niets om nu te berekenen.</p>
-  {% else %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Ingredienten</th>
-        <th>Gram</th>
-        <th></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for grocery in groceries %}
-      <tr>
-        <td>{{ grocery.name }}</td>
-        <td>{{ grocery.quantity }}</td>
-        <td class="text-right"><a class="btn btn-warning btn-sm" href="/update/{{ grocery.id }}" role="button">Aanpassen</a></td>
-        <td class="text-right"><a class="btn btn-danger btn-sm" href="/delete/{{ grocery.id }}" role="button">Verwijderen</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class "buttons">
-    <div style='float: left;'>
-      <a class="btn btn-success btn-sm" onclick="CalculateCo2();" role="button">Berekenen</a>
-    </div>
-    <div style='float: right;'>
-      <a class="btn btn-danger btn-sm" href="/deleteall" role="button">Alles Verwijderen</a>
-    </div>
+<script language="JavaScript" src="http://code.jquery.com/jquery-1.11.1.js" type="text/javascript"></script>
+<script type="text/javascript" src="../static/js/dropdown.js"></script>
+
+<script type="text/javascript" src="../static/js/crud_functions.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/sunburst.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+<div class="grid_container">
+  <div class="title_container">
+    <h1 class="title">WOKE COOKING</h1>
   </div>
-  <script type="text/javascript" src="../static/js/crud_functions.js"></script>
-  <br><br>
-  <p id="co2-score"></p>
-  {% endif %}
+  <div class="description_container">
+    <p class ="p_text">
+      Measure the carbon foodprint of your daily diet and compare it with the average diet of the Dutch!
+      <br>
+      Your impact is measured in "CO2e". For any amount of any gass, this is the effective CO2-equivalent which would warm up the earth.
+    </p>
+  </div>
+  <div class="description_container2">
+    <p class ="p_text">
+      Click on a food product or category to show more details.
+    </p>
+  </div>
+	<div class="form_container">
+    {% if message %}
+      <p>{{ message }}</p>
+    {% endif %}
+    {% include 'snippets/form.html' %}
+    <br>
+    {% if session['groceries'] == [] %}
+      <p>There are no ingredients to calculate.</p>
+    {% else %}
+    <div class="form_container2">
+			<table class="table">
+					<thead>
+					<tr>
+							<th>Ingredients</th>
+							<th>Grams</th>
+							<th></th>
+							<th></th>
+					</tr>
+					</thead>
+					<tbody>
+					{% for grocery in groceries %}
+					<tr>
+							<td>{{ grocery.name }}</td>
+							<td>{{ grocery.quantity }}</td>
+							<td class="text-right"><a class="btn btn-warning btn-sm" href="/update/{{ grocery.id }}" role="button">Modify</a></td>
+							<td class="text-right"><a class="btn btn-danger btn-sm" href="/delete/{{ grocery.id }}" role="button">Delete</a></td>
+					</tr>
+					{% endfor %}
+					</tbody>
+			</table>
+    </div>
+
+    <div style='float: right;'>
+    <a class="btn btn-danger btn-block" href="/deleteall" role="button">Delete all</a>
+    </div>
+
+    <script type="text/javascript" src="../static/js/crud_functions.js"></script>
+    <br><br>
+    <p id="co2-score"></p>
+		{% endif %}  
+	</div>
+
+	<div class="dsun_container">
+		<div id="diet_sunburst" class="diet_sunburst"></div>
+	</div>
+	
+	<div class="usun_container">
+		<div id="user_sunburst" class="user_sunburst"></div>
+	</div>
+
+	<div class="dgauge_container">
+		<div id='NL_gauge' class="diet_gauge"></div>
+	</div>
+	<div class="ugauge_container">
+		<div id='myChart' class="user_gauge"></div>	
+	</div>
+
+	<script>CalculateCo2();</script>
+
+	<div class="timeline_container">
+		<div id="timeline" class="timeline"></div>
+    <button class="btn btn-secondary" style="text-align: center; width: 20%;" id="resetChart">Reset timeline</button>
+	</div>
+
+
+	<div class="barplot_container">
+		<div id="barplot" class="barplot"></div>
+	</div>
+
+	<div id="all_products_sunburst" style="display: none;"></div>
+
 </div>
+
+<script>
+var category_chart = Highcharts.chart('barplot', {
+chart: {
+        type: 'bar',
+        backgroundColor: 'rgba(0,0,0,0)'
+    },
+    lang: {
+        noData: ''
+    },
+    title: {
+        text: 'Comparison of emission rates'
+    },
+    subtitle: {
+        text: "Emission rates are displayed for one kg of the selected product",
+        style: {
+                color: "#555555"
+            }
+    },
+    xAxis: {
+        crosshair: true,
+        labels: {
+            style: {
+                color: "black"
+            }
+        }
+    },
+    yAxis: {
+        title: {
+            text: 'kg CO2e / kg product',
+            style: {
+                color: "black"
+            }
+        },
+        labels: {
+            style: {
+                color: "black"
+            }
+        }
+    },
+    tooltip: {
+        headerFormat: '<span style="font-size:15px">{point.key}</span><table>',
+        pointFormat: '<tr><td style="padding:0"><b>{point.y:.2f}</b> kg CO2eq / kg product</td></tr>',
+        footerFormat: '</table>',
+        shared: true,
+        useHTML: true
+    },
+    plotOptions: {
+        column: {
+            pointPadding: 0.2,
+            borderWidth: 0
+        }
+    },
+    series: [{
+        name: 'No category selected',
+        data: []
+    }],
+    credits: {
+        enabled: false
+    },
+    exporting: false
+});
+</script>
+
+<script>
+// Calls process_userdata function in app.py to get new sunburst data
+// and redraws user sunburst with new data
+function RedrawUserChart() {
+  var fetch_url = "/process_userdata";
+  fetch(fetch_url)
+    .then(response => response.json())
+      // series[0] is the sunburst data object
+    .then(data => user_sunburst_chart.series[0].setData(data["user_data"]))
+      // only shows new plot after redrawing
+    .then(user_sunburst_chart.redraw());
+}
+
+// data -> sunburst-structured data for NL diet
+var data = JSON.parse('{{ data|safe }}');
+// user_data -> general sunburst data of all foods in the dataset
+var user_data = JSON.parse('{{ cycle_data|safe }}');
+
+var users_ingredients = JSON.parse('{{ users_ingredients|safe }}');
+var user_co2_kg_total;
+
+// cycel_dict -> dictionary with co2 emission data per component in product cycle, for each food
+var cycle_dict = JSON.parse('{{ cycle_dict|safe }}');
+var n_series_in_timeline = 0;
+var reset_unpressed = true;
+
+function shadeColor(color, percent) {
+    var R = parseInt(color.substring(1,3),16);
+    var G = parseInt(color.substring(3,5),16);
+    var B = parseInt(color.substring(5,7),16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;
+    G = (G<255)?G:255;
+    B = (B<255)?B:255;
+
+    var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+    var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+    var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
+}
+
+// User sunburst, updated when 'Calculate' button is pressed by user
+var user_sunburst_chart = Highcharts.chart('user_sunburst', {
+    lang: {
+        noData: 'No diet shown yet'
+    },
+    plotOptions: {
+        series: {
+            {#borderWidth: 1.2,#}
+            events: {
+                // Function that adds the corresponding food to the timeline chart,
+                // executes when food on sunburst is clicked
+                click: function (event) {
+                    var seriesName = event.point.name;
+                    var seriesData = [];
+                    var current_color = event.point.color;
+                    // Plot category products on bar chart
+                    if ( event.point.node.level === 3 ) {
+                        var node_id = event.point.node.id;
+                        var category_name = all_products_sunburst.get(node_id).name;
+                        var category_color = event.point.node.color;
+                        var xAxis_names = [], bar_values = [];
+                        var childnodes = all_products_sunburst.get(node_id).node.children.reverse();
+                        childnodes.forEach(function(node) {
+                            xAxis_names.push(node.name);
+                            bar_values.push({'y': node.val, 'color': category_color});
+                        });
+                        category_chart.series[0].update({name:category_name, data:bar_values, color: category_color});
+                        category_chart.xAxis[0].setCategories(xAxis_names);
+                    }
+                    // Highlight clicked products, causes some bugs (first click a product -> press Berekenen) so can be removed
+                    if ( event.point.node.level === 4 ) {
+                    {#    this.data[event.point.index].sliced = true;#}
+                    {#    user_sunburst_chart.series[0].setData(this.data);#}
+                    {#    user_sunburst_chart.redraw();#}
+                        var node_id = event.point.node.parent;
+                        var category_name = all_products_sunburst.get(node_id).name;
+                        var category_color = event.point.node.color;
+                        var xAxis_names = [], bar_values = [];
+                        var childnodes = all_products_sunburst.get(node_id).node.children;
+                        childnodes.forEach(function(node) {
+                            xAxis_names.push(node.name);
+                            if ( node.name === event.point.node.name ) {
+                                bar_values.push({'y': node.val, 'color': shadeColor(category_color, -20)});
+                            }
+                            else {
+                                bar_values.push({'y': node.val, 'color': category_color});
+                            }
+                        });
+                        category_chart.series[0].update({name:category_name, data:bar_values, color: category_color});
+                        category_chart.xAxis[0].setCategories(xAxis_names);
+                    }
+                    // Find correct emission cycle data for given food
+                    if (seriesName in cycle_dict) {
+                        n_series_in_timeline += 1;
+                        for (i in users_ingredients) {
+                            if (users_ingredients[i].name == seriesName) {
+                                if (users_ingredients[i].value) {
+                                    // Parse string to floats, unpack and add to array
+                                    seriesData.push(...cycle_dict[seriesName].map(i => parseFloat(i)));
+                                    // Add new series to timeline
+                                    timeline_chart.addSeries({
+                                        name: seriesName,
+                                        data: seriesData,
+                                        color: current_color
+                                     });
+                                    var datalabel_txt = [["Changes in biomass from deforestation", "and changes in soil carbon."],
+                                    ["Emissions from cattle, wetland, manure,", "fertilizers, and farm machinery."],
+                                    ["On-farm emissions from crop production and", "its processing into feed for livestock."],
+                                    ["Emissions from energy use in the process of converting", "raw agricultural products into final food items."],
+                                    ["Emissions from energy use in transport of", "food items in-country and internationally"],
+                                    ["Emissions from energy use in refrigeration", "and other retail processes."],
+                                    ["Emissions from the production of packaging materials,", "material transport and end-of-life disposal."]]
+                                    $('document').ready(function () {
+                                        $("#label_Landusechange").tooltip({placement: 'bottom', title:datalabel_txt[0][0] + ' ' + datalabel_txt[0][1]});
+                                        $("#label_Farm").tooltip({placement: 'bottom', title:datalabel_txt[1][0] + ' ' + datalabel_txt[1][1]});
+                                        $("#label_AnimalFeed").tooltip({placement: 'bottom', title:datalabel_txt[2][0] + ' ' + datalabel_txt[2][1]});
+                                        $("#label_Processing").tooltip({placement: 'bottom', title:datalabel_txt[3][0] + ' ' + datalabel_txt[3][1]});
+                                        $("#label_Transport").tooltip({placement: 'bottom', title:datalabel_txt[4][0] + ' ' + datalabel_txt[4][1]});
+                                        $("#label_Retail").tooltip({placement: 'bottom', title:datalabel_txt[5][0] + ' ' + datalabel_txt[5][1]});
+                                        $("#label_Packaging").tooltip({placement: 'bottom', title:datalabel_txt[6][0] + ' ' + datalabel_txt[6][1]});
+                                    });
+                                    // This part shows the new timeline in intervals and gives
+                                    // explanations about the product cycle when timeline stops.
+                                    var idx = n_series_in_timeline - 1,
+                                        interval_time = 3500,
+                                        line_animation_time = 1000,
+                                        series = timeline_chart.series[idx],
+                                        clipper = timeline_chart.renderer.clipRect(0,0,series.points[0].plotX + 2,timeline_chart.plotHeight);
+                                    series.group.clip(clipper);
+                                    series.markerGroup.clip(clipper);
+                                    // Only plot intervals for first food
+                                    if ( idx === 0 && reset_unpressed ) {
+                                        // Plot datalabel for first x value
+                                        series.points[0].update({
+                                            dataLabels: {
+                                                enabled: true,
+                                                inside: false,
+                                                overflow: 'justify',
+                                                crop: true,
+                                                shape: 'callout',
+                                                backgroundColor: "rgba(255,255,255,0.5)",
+                                                borderColor: 'rgb(0, 108, 169)',
+                                                {#color: 'rgba(255,255,255,0.75)',#}
+                                                opacity: 1.0,
+                                                borderWidth: .5,
+                                                borderRadius: 5,
+                                                y: -10,
+                                                style: {
+                                                    fontFamily: 'Helvetica, sans-serif',
+                                                    fontSize: '20px',
+                                                    fontWeight: 'normal',
+                                                    textShadow: 'none'
+                                                },
+                                                formatter: function () {
+                                                    return datalabel_txt[0][0] +"<br>"+ datalabel_txt[0][1];
+                                                }
+                                            }
+                                        });
+                                        // Datalabels for 2nd til last x
+                                        for (var i=0;i<6;i++) {
+                                            (function(ind) {
+                                                setTimeout(function(){
+                                                    series.points[ind].update({
+                                                        dataLabels: {
+                                                            enabled: false
+                                                        }
+                                                    });
+                                                    series.points[ind+1].update({
+                                                        dataLabels: {
+                                                            enabled: true,
+                                                            inside: false,
+                                                            overflow: 'justify',
+                                                            crop: true,
+                                                            shape: 'callout',
+                                                            backgroundColor: "rgba(255,255,255,0.5)",
+                                                            borderColor: 'rgb(0, 108, 169)',
+                                                            {#color: 'rgba(255,255,255,0.75)',#}
+                                                            opacity: 1.0,
+                                                            borderWidth: .5,
+                                                            borderRadius: 5,
+                                                            y: -10,
+                                                            style: {
+                                                                fontFamily: 'Helvetica, sans-serif',
+                                                                fontSize: '20px',
+                                                                fontWeight: 'normal',
+                                                                textShadow: 'none'
+                                                            },
+                                                            formatter: function () {
+                                                                return datalabel_txt[ind+1][0] +"<br>"+ datalabel_txt[ind+1][1];
+                                                            }
+                                                        }
+                                                    });
+                                                }, (interval_time) + interval_time * ind);
+                                                // Drawing line segments with timer
+                                                setTimeout(function(){
+                                                    var clipper = timeline_chart.renderer.clipRect(0, 0, series.points[ind].plotX + 3, timeline_chart.plotHeight);
+                                                    series.group.clip(clipper);
+                                                    series.markerGroup.clip(clipper)
+                                                    clipper.animate({
+                                                        width: series.points[ind+1].plotX + 3
+                                                    }, {
+                                                        duration: line_animation_time
+                                                    });
+                                                }, (interval_time - line_animation_time) + interval_time * ind);
+
+                                            })(i);
+                                        }
+                                        setTimeout(function(){
+                                            series.points[6].update({
+                                                dataLabels: {
+                                                    enabled: false
+                                                }
+                                            });
+                                        }, (interval_time - line_animation_time) + interval_time * 6);
+                                    }
+                                    // Show whole timeline at once
+                                    else {
+                                        clipper.animate({
+                                        width: series.points[6].plotX + 3
+                                         }, {
+                                        duration: interval_time
+                                         });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    chart: {
+        // height: '100%',
+        backgroundColor: 'rgba(0,0,0,0)',
+        drilldown: function (event) {
+            console.log(event)
+        },
+    },
+    credits: {
+        enabled: false
+    },
+    title: {
+        text: "Emission across your diet"
+    },
+    subtitle: {
+        text: null
+    },
+    series: [{
+        type: "sunburst",
+        data: users_ingredients,
+        allowDrillToNode: true,
+        cursor: 'pointer',
+        dataLabels: {
+            format: '{point.name}',
+            filter: {
+                property: 'innerArcLength',
+                operator: '>',
+                value: 16
+            },
+            rotationMode: 'circular'
+        },
+        levels: [{
+            level: 1,
+            levelIsConstant: false,
+            dataLabels: {
+                filter: {
+                    property: 'outerArcLength',
+                    operator: '>',
+                    value: 64
+                }
+            }
+        }, {
+            level: 2,
+            colorByPoint: true
+        },
+        {
+            level: 3,
+            colorByPoint: true,
+            {#colorVariation: {#}
+            {#    key: 'brightness',#}
+            {#    to: -0.5#}
+            {# }#}
+        }, {
+            level: 4,
+            {#colorVariation: {#}
+            {#    key: 'brightness',#}
+            {#    to: -0.3#}
+            {# }#}
+        }]
+
+    }],
+    tooltip: {
+        headerFormat: "",
+        pointFormat: 'The emission of <b>{point.name}</b> is <b>{point.kg_co2:.2f} kg</b> CO2e, <br/> which is <b>{point.value:.2f}%</b> of your total emission'
+    },
+    exporting: false
+});
+
+// General sunburst chart, contains Dutch averate diet info
+var diet_sunburst_chart = Highcharts.chart('diet_sunburst', {
+    chart: {
+        {#height: '100%',#}
+        backgroundColor: 'rgba(0,0,0,0)',
+    },
+    plotOptions: {
+        series: {
+            events: {
+                click: function (event) {
+                    // Plot category products on bar chart
+                    if (event.point.node.level === 3) {
+                        var node_name = event.point.node.name;
+                        var node_id;
+                        // Search node_id in all_product_sunburst
+                        user_data.forEach(function (dict) {
+                            if (dict.name === node_name) {
+                                node_id = dict.id;
+                            }
+                        });
+
+                        var category_name = all_products_sunburst.get(node_id).name;
+                        var category_color = event.point.node.color;
+                        var xAxis_names = [], bar_values = [];
+                        var childnodes = all_products_sunburst.get(node_id).node.children;
+                        childnodes.forEach(function (node) {
+                            xAxis_names.push(node.name);
+                            bar_values.push({'y': node.val, 'color': category_color});
+                        });
+                        category_chart.series[0].update({name: category_name, data: bar_values, color: category_color});
+                        category_chart.xAxis[0].setCategories(xAxis_names);
+                    }
+                }
+            }
+        }
+    },
+    credits: {
+    enabled: false
+    },
+    title: {
+        text: "Daily emission across the average Dutch diet"
+    },
+    subtitle: {
+        text: null
+    },
+    series: [{
+        type: "sunburst",
+        data: data,
+        allowDrillToNode: true,
+        cursor: 'pointer',
+        dataLabels: {
+            format: '{point.name}',
+            filter: {
+                property: 'innerArcLength',
+                operator: '>',
+                value: 16
+            },
+            rotationMode: 'circular'
+        },
+        levels: [{
+            level: 1,
+            levelIsConstant: false,
+            dataLabels: {
+                filter: {
+                    property: 'outerArcLength',
+                    operator: '>',
+                    value: 64
+                }
+            }
+        }, {
+            level: 2,
+            colorByPoint: true
+        },
+        {
+            level: 3,
+            colorByPoint: true
+            {#colorVariation: {#}
+            {#    key: 'brightness',#}
+            {#    to: -0.4#}
+            {# }#}
+        }, {
+            level: 4,
+            {#colorVariation: {#}
+            {#    key: 'brightness',#}
+            {#    to: 0.5#}
+            {# }#}
+        }]
+
+    }],
+    tooltip: {
+        headerFormat: "",
+        pointFormat: 'The Dutch average emission of <b>{point.name}</b> is <b>{point.kg_co2:.2f} kg</b> CO2e, <br/> which is <b>{point.value:.2f}%</b> of the average total emission'
+    },
+    exporting: false
+});
+
+// Reset timeline chart when clicked
+document.getElementById('resetChart').addEventListener('click', () => {
+    {#var temp = user_sunburst_chart.series[0].data;#}
+    {#temp.forEach(item => item.sliced = false)#}
+    {#user_sunburst_chart.series[0].setData(temp);#}
+    {#user_sunburst_chart.redraw();#}
+
+    while (timeline_chart.series.length) {
+      timeline_chart.series[0].remove();
+    }
+    n_series_in_timeline = 0;
+    reset_unpressed = false;
+});
+
+
+// {# Script voor Timeline #}
+var timeline_chart = Highcharts.chart('timeline', {
+    chart: {
+        type: 'areaspline',
+        inverted: false,
+        {#height: 600,#}
+        backgroundColor: 'rgba(0,0,0,0)'
+    },
+    lang: {
+        noData: ''
+    },
+    title: {
+        text: 'Emission rates across various stages of the supply chain',
+    },
+    subtitle: {
+        text: "Emission rates are displayed for one kg of the selected product",
+        style: {
+                color: "#555555"
+            }
+    },
+    xAxis: {
+        {#reversed: false,#}
+        title: {
+            enabled: false,
+            text: ''
+        },
+        categories: [
+            'Land use change',
+            'Farm',
+            'Animal Feed',
+            'Processing',
+            'Transport',
+            'Retail',
+            'Packaging'
+        ],
+        min: 0,
+        max: 6,
+        labels: {
+            useHTML: true,
+            // Generate divs for tooltips of each x-axis label
+            formatter: function() {
+                return '<div id="label_'+this.value.replace(/ /g,'') +'">'+this.value+'</div>';
+            },
+            align: 'center',
+            style: {
+                fontSize: '15px',
+                color: 'black'
+            }
+        },
+        accessibility: {
+            rangeDescription: 'Range: 0 to 80 km.'
+         },
+        maxPadding: 0.05,
+        showLastLabel: true
+    },
+    yAxis: {
+      title: {
+            text: 'kg CO2e / kg product',
+            style: {
+                color: "black"
+            }
+        },
+        labels: {
+            format: '{value}',
+            style: {
+                fontSize: '15px',
+                color: 'black'
+            }
+        },
+        accessibility: {
+            rangeDescription: 'Range: -90°C to 20°C.'
+        },
+        lineWidth: 2
+    },
+    legend: {
+        enabled: false
+    },
+    tooltip: {
+        headerFormat: '<b>{series.name}</b><br/>',
+        pointFormat: '{point.category} emission is {point.y:.2f} kg CO2e'
+    },
+    credits: {
+        enabled: false
+    },
+    plotOptions: {
+        areaspline: {
+            marker: {
+                enable: false
+            },
+            {#animation: {#}
+            {#    duration: 3000#}
+            {# },#}
+            animation: false,
+            opacity: 1.0,
+            fillOpacity: 0.5
+        },
+     },
+    exporting: false
+});
+
+</script>
+
+<script>
+var all_products_sunburst = Highcharts.chart('all_products_sunburst', {
+    // Use pre-set array of colors
+    colors: ["#fcfcdc", "#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9","#fff2ae","#f1e2cc","#cccccc"],
+    plotOptions: {
+        series: {
+            events: {
+                // Function that adds the corresponding food to the timeline chart,
+                // executes when food on sunburst is clicked
+                click: function (event) {
+                    var seriesName = event.point.name;
+                    var seriesData = [];
+                    var current_color = event.point.color;
+                    // Plot category products on bar chart
+                    if (event.point.node.level == 3) {
+                        console.log(event)
+                        console.log(user_sunburst_chart.get('2.1'))
+                        category_chart.series[0].update({name:"name u want to change", data:[20, 30, 40, 50], color: current_color});
+                        category_chart.xAxis[0].setCategories(['One', 'Two']);
+                    }
+                    // Highlight clicked products, causes some bugs (first click a product -> press Berekenen) so can be removed
+                    if ( event.point.node.level == 4 ) {
+                        this.data[event.point.index].sliced = true;
+                        user_sunburst_chart.series[0].setData(this.data);
+                        user_sunburst_chart.redraw();
+                    }
+                    // Find correct emission cycle data for given food
+                    if (seriesName in cycle_dict) {
+                        n_series_in_timeline += 1;
+                        for (i in user_data) {
+                            if (user_data[i].name == seriesName) {
+                                if (user_data[i].value) {
+                                    // Parse string to floats, unpack and add to array
+                                    seriesData.push(...cycle_dict[seriesName].map(i => parseFloat(i)));
+                                    // Add new series to timeline
+                                    timeline_chart.addSeries({
+                                        name: seriesName,
+                                        data: seriesData,
+                                        color: current_color
+                                     });
+                                    var datalabel_txt = [["Changes in biomass from deforestation", "and changes in soil carbon."],
+                                    ["Emissions from cattle, wetland, manure,", "fertilizers, and farm machinery."],
+                                    ["On-farm emissions from crop production and", "its processing into feed for livestock."],
+                                    ["Emissions from energy use in the process of converting", "raw agricultural products into final food items."],
+                                    ["Emissions from energy use in transport of", "food items in-country and internationally"],
+                                    ["Emissions from energy use in refrigeration", "and other retail processes."],
+                                    ["Emissions from the production of packaging materials,", "material transport and end-of-life disposal."]]
+                                    $('document').ready(function () {
+                                        $("#label_Landusechange").tooltip({placement: 'bottom', title:datalabel_txt[0][0] + ' ' + datalabel_txt[0][1]});
+                                        $("#label_Farm").tooltip({placement: 'bottom', title:datalabel_txt[1][0] + ' ' + datalabel_txt[1][1]});
+                                        $("#label_AnimalFeed").tooltip({placement: 'bottom', title:datalabel_txt[2][0] + ' ' + datalabel_txt[2][1]});
+                                        $("#label_Processing").tooltip({placement: 'bottom', title:datalabel_txt[3][0] + ' ' + datalabel_txt[3][1]});
+                                        $("#label_Transport").tooltip({placement: 'bottom', title:datalabel_txt[4][0] + ' ' + datalabel_txt[4][1]});
+                                        $("#label_Retail").tooltip({placement: 'bottom', title:datalabel_txt[5][0] + ' ' + datalabel_txt[5][1]});
+                                        $("#label_Packaging").tooltip({placement: 'bottom', title:datalabel_txt[6][0] + ' ' + datalabel_txt[6][1]});
+                                    });
+                                    // This part shows the new timeline in intervals and gives
+                                    // explanations about the product cycle when timeline stops.
+                                    var idx = n_series_in_timeline - 1,
+                                        interval_time = 3500,
+                                        line_animation_time = 1000,
+                                        series = timeline_chart.series[idx],
+                                        clipper = timeline_chart.renderer.clipRect(0,0,series.points[0].plotX + 2,timeline_chart.plotHeight);
+                                    series.group.clip(clipper);
+                                    series.markerGroup.clip(clipper);
+                                    // Only plot intervals for first food
+                                    if ( idx === 0 && reset_unpressed ) {
+                                        // Plot datalabel for first x value
+                                        series.points[0].update({
+                                            dataLabels: {
+                                                enabled: true,
+                                                inside: false,
+                                                overflow: 'justify',
+                                                crop: true,
+                                                shape: 'callout',
+                                                backgroundColor: "rgba(255,255,255,0.5)",
+                                                borderColor: 'rgb(0, 108, 169)',
+                                                {#color: 'rgba(255,255,255,0.75)',#}
+                                                opacity: 1.0,
+                                                borderWidth: .5,
+                                                borderRadius: 5,
+                                                y: -10,
+                                                style: {
+                                                    fontFamily: 'Helvetica, sans-serif',
+                                                    fontSize: '20px',
+                                                    fontWeight: 'normal',
+                                                    textShadow: 'none'
+                                                },
+                                                formatter: function () {
+                                                    return datalabel_txt[0][0] +"<br>"+ datalabel_txt[0][1];
+                                                }
+                                            }
+                                        });
+                                        // Datalabels for 2nd til last x
+                                        for (var i=0;i<6;i++) {
+                                            (function(ind) {
+                                                setTimeout(function(){
+                                                    series.points[ind].update({
+                                                        dataLabels: {
+                                                            enabled: false
+                                                        }
+                                                    });
+                                                    series.points[ind+1].update({
+                                                        dataLabels: {
+                                                            enabled: true,
+                                                            inside: false,
+                                                            overflow: 'justify',
+                                                            crop: true,
+                                                            shape: 'callout',
+                                                            backgroundColor: "rgba(255,255,255,0.5)",
+                                                            borderColor: 'rgb(0, 108, 169)',
+                                                            {#color: 'rgba(255,255,255,0.75)',#}
+                                                            opacity: 1.0,
+                                                            borderWidth: .5,
+                                                            borderRadius: 5,
+                                                            y: -10,
+                                                            style: {
+                                                                fontFamily: 'Helvetica, sans-serif',
+                                                                fontSize: '20px',
+                                                                fontWeight: 'normal',
+                                                                textShadow: 'none'
+                                                            },
+                                                            formatter: function () {
+                                                                return datalabel_txt[ind+1][0] +"<br>"+ datalabel_txt[ind+1][1];
+                                                            }
+                                                        }
+                                                    });
+                                                }, (interval_time) + interval_time * ind);
+                                                // Drawing line segments with timer
+                                                setTimeout(function(){
+                                                    var clipper = timeline_chart.renderer.clipRect(0, 0, series.points[ind].plotX + 3, timeline_chart.plotHeight);
+                                                    series.group.clip(clipper);
+                                                    series.markerGroup.clip(clipper)
+                                                    clipper.animate({
+                                                        width: series.points[ind+1].plotX + 3
+                                                    }, {
+                                                        duration: line_animation_time
+                                                    });
+                                                }, (interval_time - line_animation_time) + interval_time * ind);
+
+                                            })(i);
+                                        }
+                                        setTimeout(function(){
+                                            series.points[6].update({
+                                                dataLabels: {
+                                                    enabled: false
+                                                }
+                                            });
+                                        }, (interval_time - line_animation_time) + interval_time * 6);
+                                    }
+                                    // Show whole timeline at once
+                                    else {
+                                        clipper.animate({
+                                        width: series.points[6].plotX + 3
+                                         }, {
+                                        duration: interval_time
+                                         });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    chart: {
+        {#height: '100%',#}
+        backgroundColor: 'rgba(0,0,0,0)',
+        drilldown: function (event) {
+            console.log(event)
+        },
+    },
+    credits: {
+        enabled: false
+    },
+    title: {
+        text: null
+    },
+    series: [{
+        type: "sunburst",
+        data: user_data,
+        allowDrillToNode: true,
+        cursor: 'pointer',
+        dataLabels: {
+            format: '{point.name}',
+            filter: {
+                property: 'innerArcLength',
+                operator: '>',
+                value: 16
+            },
+            rotationMode: 'circular'
+        },
+        levels: [{
+            level: 1,
+            levelIsConstant: false,
+            dataLabels: {
+                filter: {
+                    property: 'outerArcLength',
+                    operator: '>',
+                    value: 64
+                }
+            }
+        }, {
+            level: 2,
+            colorByPoint: true
+        },
+        {
+            level: 3,
+            colorByPoint: true,
+            {#colorVariation: {#}
+            {#    key: 'brightness',#}
+            {#    to: -0.5#}
+            {# }#}
+        }, {
+            level: 4,
+            {#colorVariation: {#}
+            {#    key: 'brightness',#}
+            {#    to: -0.3#}
+            {# }#}
+        }]
+
+    }],
+    tooltip: {
+        headerFormat: "",
+        pointFormat: 'The emission of <b>{point.name}</b> is <b>{point.kg_co2:.2f} kg</b> CO2e, <br/> which is <b>{point.value:.2f}%</b> of your total emission'
+    },
+    exporting: false
+});
+</script>
+
 {% endblock content %}

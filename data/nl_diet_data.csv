@@ -1,0 +1,17 @@
+0.1,Food,,100,,#fcfcdc
+1.1,Vegetal Products,Food,20.22,0.1,#b3e2cd
+1.2,Animal Products,Food,79.78,0.1,#fdcdac
+2.4,Pulses,Vegetal Products,0.07183908,1.1,#f4cae4
+2.2,Starchy Roots,Vegetal Products,0.514846743,1.1,#ffabab
+3,Stimulants & Spices,Vegetal Products,0.826149425,1.1,#cccccc
+2.9,Fruits,Vegetal Products,2.023467433,1.1,#fee067
+2.8,Vegetables,Vegetal Products,2.598180077,1.1,#dabb6c
+2.3,Sugar and Sweeteners,Vegetal Products,2.693965517,1.1,#cbd5e8
+2.7,Oilcrops,Vegetal Products,3.220785441,1.1,#cce2cb
+2.1,Cereals (Grain crops),Vegetal Products,3.472222222,1.1,#cccccc
+3.2,Beverages,Vegetal Products,4.801245211,1.1,#f8bc68
+3.7,Seafood,Animal Products,2.131226054,1.2,#cbd5e8
+3.5,Eggs,Animal Products,2.358716475,1.2,#fee067
+3.4,Animal By-products,Animal Products,7.052203065,1.2,#f4cae4
+3.3,Meats,Animal Products,30.72318008,1.2,#abdee6
+3.6,Dairy Products,Animal Products,37.51197318,1.2,#cce2cb

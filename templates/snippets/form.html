@@ -1,14 +1,196 @@
 <form action="/" method="POST">
-  <div class="form-row">
-    <div class="col-sm-5 my-1">
-      <label for="newStuff" class="sr-only">New Stuff:</label>
-      <input type="text" class="form-control" name="name" id="newStuff" placeholder="Nieuw ingredient">
+  <div class="form-row" style="padding-left: 5px;">
+    <div class="col-sm-6 my-1">
+      <div class="btn-group btn-block">
+        <a id="dLabel" role="button" data-toggle="dropdown" class="btn btn-light dropdown-toggle text-left" href="">
+          Search your ingredient
+        </a>
+        <ul class="selectPkeyVkey dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Animal By-products
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Animal Fats"><a class="dropdown-item">Animal Fats</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Beverages
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Barley (Beer)"><a class="dropdown-item">Barley (Beer)</a></li>
+              <li value="Coffee"><a class="dropdown-item">Coffee</a></li>
+              <li value="Soymilk"><a class="dropdown-item">Soymilk</a></li>
+              <li value="Wine"><a class="dropdown-item">Wine</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Cereals (Grain crops)
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Cereals & Oilcrops Misc."><a class="dropdown-item">Cereals & Oilcrops Misc.</a></li>
+              <li value="Maize (Meal)"><a class="dropdown-item">Maize (Meal)</a></li>
+              <li value="Oatmeal"><a class="dropdown-item">Oatmeal</a></li>
+              <li value="Rice"><a class="dropdown-item">Rice</a></li>
+              <li value="Tofu"><a class="dropdown-item">Tofu</a></li>
+              <li value="Wheat & Rye (Bread)"><a class="dropdown-item">Wheat & Rye (Bread)</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Dairy Products
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Butter, Cream & Ghee"><a class="dropdown-item">Butter, Cream & Ghee</a></li>
+              <li value="Cheese"><a class="dropdown-item">Cheese</a></li>
+              <li value="Milk"><a class="dropdown-item">Milk</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Fruits
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Apples"><a class="dropdown-item">Apples</a></li>
+              <li value="Bananas"><a class="dropdown-item">Bananas</a></li>
+              <li value="Berries & Grapes"><a class="dropdown-item">Berries & Grapes</a></li>
+              <li value="Citrus Fruit"><a class="dropdown-item">Citrus Fruit</a></li>
+              <li value="Groundnuts"><a class="dropdown-item">Groundnuts</a></li>
+              <li value="Nuts"><a class="dropdown-item">Nuts</a></li>
+              <li value="Other Fruit"><a class="dropdown-item">Other Fruit</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Meats
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Bovine Meat (beef herd)"><a class="dropdown-item">Bovine Meat (beef herd)</a></li>
+              <li value="Bovine Meat (dairy herd)"><a class="dropdown-item">Bovine Meat (dairy herd)</a></li>
+              <li value="Buffalo"><a class="dropdown-item">Buffalo</a></li>
+              <li value="Lamb & Mutton"><a class="dropdown-item">Lamb & Mutton</a></li>
+              <li value="Pig Meat"><a class="dropdown-item">Pig Meat</a></li>
+              <li value="Poultry Meat"><a class="dropdown-item">Poultry Meat</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Oilcrops
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Oils Misc."><a class="dropdown-item">Oils Misc.</a></li>
+              <li value="Olive Oil"><a class="dropdown-item">Olive Oil</a></li>
+              <li value="Palm Oil"><a class="dropdown-item">Palm Oil</a></li>
+              <li value="Rapeseed Oil"><a class="dropdown-item">Rapeseed Oil</a></li>
+              <li value="Soybean Oil"><a class="dropdown-item">Soybean Oil</a></li>
+              <li value="Sunflower Oil"><a class="dropdown-item">Sunflower Oil</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Eggs
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Eggs (chicken)"><a class="dropdown-item">Eggs (chicken)</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Pulses
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Other Pulses"><a class="dropdown-item">Other Pulses</a></li>
+              <li value="Peas"><a class="dropdown-item">Peas</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Seafood
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Crustaceans (farmed)"><a class="dropdown-item">Crustaceans (farmed)</a></li>
+              <li value="Fish (farmed)"><a class="dropdown-item">Fish (farmed)</a></li>
+              <li value="Fish & Crustaceans (capture)"><a class="dropdown-item">Fish & Crustaceans (capture)</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Starchy roots
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Cassava"><a class="dropdown-item">Cassava</a></li>
+              <li value="Potatoes"><a class="dropdown-item">Potatoes</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Stimulants & Spices
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Dark Chocolate"><a class="dropdown-item">Dark Chocolate</a></li>
+              <li value="Stimulants & Spices Misc."><a class="dropdown-item">Stimulants & Spices Misc.</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Sugar and Sweeteners
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Sweeteners & Honey"><a class="dropdown-item">Sweeteners & Honey</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Sugar Crops
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Beet Sugar"><a class="dropdown-item">Beet Sugar</a></li>
+              <li value="Cane Sugar"><a class="dropdown-item">Cane Sugar</a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown-submenu">
+            <a class="dropdown-item" tabindex="-1" href="#">
+              Vegetables
+            </a>
+            <ul class="dropdown-menu">
+              <li value="Aquatic Plants"><a class="dropdown-item">Aquatic Plants</a></li>
+              <li value="Brassicas"><a class="dropdown-item">Brassicas</a></li>
+              <li value="Onions & Leeks"><a class="dropdown-item">Onions & Leeks</a></li>
+              <li value="Other Vegetables"><a class="dropdown-item">Other Vegetables</a></li>
+              <li value="Root Vegetables"><a class="dropdown-item">Root Vegetables</a></li>
+              <li value="Tomatoes"><a class="dropdown-item">Tomatoes</a></li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
     </div>
-    <div class="col-sm-5 my-1">
-      <input type="text" class="form-control" name="quantity" id="quantity" placeholder="Aantal gram">
+    <input type="hidden" value="" name="name" />
+
+    <div class="col-sm-3 my-1">
+      <input type="number" class="form-control" name="quantity" id="quantity" placeholder="Grams" min="0" oninput="validity.valid||(value='');">
     </div>
-    <div class="col-sm-2 my-1">
-      <button type="submit" class="btn btn-primary btn-block">Toevoegen</button>
+
+    <div class="col-sm-3 my-1" style="padding-top: 1px;">
+      <button type="submit" class="btn btn-primary btn-block text-white">Add</button>
     </div>
+    
   </div>
 </form>
